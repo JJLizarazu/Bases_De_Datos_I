@@ -1,0 +1,304 @@
+SHOW TABLES;
+/*1.1*/
+SELECT 
+    OrderID,
+    SUM(UnitPrice * Quantity * (1 - Discount)) AS Subtotal
+FROM 
+    `Order Details`
+GROUP BY 
+    OrderID
+ORDER BY 
+    OrderID;
+/*1.2.-*/
+SELECT 
+    YEAR(o.OrderDate) AS Year,
+    SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS TotalSales
+FROM 
+    Orders o
+JOIN 
+    `Order Details` od ON o.OrderID = od.OrderID
+GROUP BY 
+    YEAR(o.OrderDate)
+ORDER BY 
+    YEAR;
+/*1.3*/
+SELECT 
+    c.CategoryName,
+    SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS TotalSales
+FROM 
+    Categories c
+JOIN 
+    Products p ON c.CategoryID = p.CategoryID
+JOIN 
+    `Order Details` od ON p.ProductID = od.ProductID
+GROUP BY 
+    c.CategoryName
+ORDER BY 
+    TotalSales DESC;
+/*1.4*/
+SELECT 
+    c.CategoryName,
+    SUM(od.Quantity) AS TotalProductsSold,
+    SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS TotalSales
+FROM 
+    Categories c
+JOIN 
+    Products p ON c.CategoryID = p.CategoryID
+JOIN 
+    `Order Details` od ON p.ProductID = od.ProductID
+GROUP BY 
+    c.CategoryName
+ORDER BY 
+    TotalProductsSold DESC;
+/*1.5*/
+SELECT 
+    e.EmployeeID,
+    CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
+    p.ProductName,
+    SUM(od.Quantity) AS TotalQuantity
+FROM 
+    Orders o
+JOIN 
+    Employees e ON o.EmployeeID = e.EmployeeID
+JOIN 
+    `Order Details` od ON o.OrderID = od.OrderID
+JOIN 
+    Products p ON od.ProductID = p.ProductID
+WHERE 
+    YEAR(o.OrderDate) = 1994
+GROUP BY 
+    e.EmployeeID, p.ProductID
+ORDER BY 
+    TotalQuantity DESC
+LIMIT 1;
+/*1.6*/
+SELECT 
+    e.EmployeeID,
+    CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
+    COUNT(o.OrderID) AS TotalOrders
+FROM 
+    Orders o
+JOIN 
+    Employees e ON o.EmployeeID = e.EmployeeID
+WHERE 
+    YEAR(o.OrderDate) = 1994
+GROUP BY 
+    e.EmployeeID
+ORDER BY 
+    TotalOrders DESC
+LIMIT 1;
+/*1.7*/
+SELECT 
+    c.Country,
+    c.CustomerID,
+    c.CompanyName AS CustomerName,
+    COUNT(o.OrderID) AS NumberOfOrders,
+    SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS TotalAmount
+FROM 
+    Orders o
+JOIN 
+    Customers c ON o.CustomerID = c.CustomerID
+JOIN 
+    `Order Details` od ON o.OrderID = od.OrderID
+WHERE 
+    YEAR(o.OrderDate) = 1997
+    AND o.ShipCountry = c.Country
+GROUP BY 
+    c.Country, c.CustomerID, c.CompanyName
+ORDER BY 
+    c.Country, TotalAmount DESC;
+/*1.8*/
+SELECT 
+    CONCAT(m.FirstName, ' ', m.LastName) AS ManagerName,
+    COUNT(DISTINCT o.OrderID) AS TotalOrders,
+    SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS TotalSales
+FROM 
+    Employees e
+JOIN 
+    Employees m ON e.ReportsTo = m.EmployeeID
+JOIN 
+    Orders o ON e.EmployeeID = o.EmployeeID
+JOIN 
+    `Order Details` od ON o.OrderID = od.OrderID
+WHERE 
+    DATEDIFF(o.ShippedDate, o.OrderDate) <= 7
+    AND o.ShippedDate IS NOT NULL
+GROUP BY 
+    m.EmployeeID
+HAVING 
+    COUNT(DISTINCT o.OrderID) > 2
+    AND SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) > 1000;
+/*1.9*/
+SELECT 
+    ProductID,
+    ProductName,
+    UnitsInStock
+FROM 
+    Products
+ORDER BY 
+    UnitsInStock DESC;
+/*1.10*/
+SELECT 
+    c.CategoryName,
+    MAX(p.UnitPrice) AS MaxPrice,
+    MIN(p.UnitPrice) AS MinPrice
+FROM 
+    Products p
+JOIN 
+    Categories c ON p.CategoryID = c.CategoryID
+GROUP BY 
+    c.CategoryName;
+/*1.11*/
+SELECT 
+    s.CompanyName AS SupplierName,
+    MAX(p.UnitPrice) AS MaxPrice,
+    MIN(p.UnitPrice) AS MinPrice
+FROM 
+    Products p
+JOIN 
+    Suppliers s ON p.SupplierID = s.SupplierID
+GROUP BY 
+    s.CompanyName;
+/*1.12*/
+SELECT 
+    c.CategoryName,
+    COUNT(p.ProductID) AS NumberOfProducts
+FROM 
+    Categories c
+JOIN 
+    Products p ON c.CategoryID = p.CategoryID
+GROUP BY 
+    c.CategoryName
+HAVING 
+    COUNT(p.ProductID) > 5;
+/*1.13*/
+SELECT 
+    Country,
+    COUNT(CustomerID) AS NumberOfCustomers
+FROM 
+    Customers
+GROUP BY 
+    Country
+ORDER BY 
+    NumberOfCustomers DESC;
+/*1.14*/
+SELECT 
+    City,
+    COUNT(CustomerID) AS NumberOfCustomers
+FROM 
+    Customers
+GROUP BY 
+    City
+ORDER BY 
+    NumberOfCustomers DESC;
+/*1.15*/
+SELECT 
+    c.CategoryName,
+    SUM(p.UnitsInStock) AS TotalStock
+FROM 
+    Products p
+JOIN 
+    Categories c ON p.CategoryID = c.CategoryID
+GROUP BY 
+    c.CategoryName;
+/*1.16*/
+SELECT 
+    c.CategoryName,
+    SUM(p.UnitsInStock) AS TotalStock
+FROM 
+    Products p
+JOIN 
+    Categories c ON p.CategoryID = c.CategoryID
+WHERE 
+    p.CategoryID IN (2, 5, 8)
+GROUP BY 
+    c.CategoryName;
+/*1.17*/
+SELECT 
+    c.CompanyName AS CustomerName,
+    s.CompanyName AS SupplierName,
+    CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
+    p.ProductName
+FROM 
+    Orders o
+JOIN 
+    Customers c ON o.CustomerID = c.CustomerID
+JOIN 
+    Employees e ON o.EmployeeID = e.EmployeeID
+JOIN 
+    `Order Details` od ON o.OrderID = od.OrderID
+JOIN 
+    Products p ON od.ProductID = p.ProductID
+JOIN 
+    Suppliers s ON p.SupplierID = s.SupplierID
+WHERE 
+    o.OrderID = 10250;
+/*1.18*/
+SELECT 
+    c.CompanyName AS CustomerName,
+    YEAR(o.OrderDate) AS Year,
+    COUNT(o.OrderID) AS NumberOfOrders
+FROM 
+    Orders o
+JOIN 
+    Customers c ON o.CustomerID = c.CustomerID
+GROUP BY 
+    c.CompanyName, YEAR(o.OrderDate)
+ORDER BY 
+    CustomerName, Year;
+/*1.19*/
+SELECT 
+    CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
+    YEAR(o.OrderDate) AS Year,
+    COUNT(o.OrderID) AS NumberOfOrders
+FROM 
+    Orders o
+JOIN 
+    Employees e ON o.EmployeeID = e.EmployeeID
+GROUP BY 
+    e.EmployeeID, YEAR(o.OrderDate)
+ORDER BY 
+    EmployeeName, Year;
+/*1.20*/
+SELECT 
+    c.CompanyName AS CustomerName,
+    YEAR(o.OrderDate) AS Year,
+    MONTH(o.OrderDate) AS Month,
+    COUNT(o.OrderID) AS NumberOfOrders
+FROM 
+    Orders o
+JOIN 
+    Customers c ON o.CustomerID = c.CustomerID
+GROUP BY 
+    c.CompanyName, YEAR(o.OrderDate), MONTH(o.OrderDate)
+ORDER BY 
+    CustomerName, Year, Month;
+/*1.21*/
+SELECT 
+    e.EmployeeID,
+    CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
+    YEAR(o.OrderDate) AS Year,
+    COUNT(o.OrderID) AS NumberOfOrders
+FROM 
+    Employees e
+LEFT JOIN 
+    Orders o ON e.EmployeeID = o.EmployeeID
+GROUP BY 
+    e.EmployeeID, YEAR(o.OrderDate)
+ORDER BY 
+    EmployeeName, Year;
+/*1.22*/
+SELECT 
+    c.CustomerID,
+    c.CompanyName AS CustomerName,
+    YEAR(o.OrderDate) AS Year,
+    MONTH(o.OrderDate) AS Month,
+    COUNT(o.OrderID) AS NumberOfOrders
+FROM 
+    Customers c
+LEFT JOIN 
+    Orders o ON c.CustomerID = o.CustomerID
+GROUP BY 
+    c.CustomerID, c.CompanyName, YEAR(o.OrderDate), MONTH(o.OrderDate)
+ORDER BY 
+    CustomerName, Year, Month;

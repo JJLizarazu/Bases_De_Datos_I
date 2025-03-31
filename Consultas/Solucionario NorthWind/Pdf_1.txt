@@ -1,0 +1,37 @@
+/*0*/
+SELECT * FROM products;
+SELECT * FROM customers;
+SELECT * FROM employees;
+/*1.-*/
+SELECT ProductName AS 'Producto', UnitPrice AS 'Precio'
+FROM products
+ORDER BY  UnitPrice DESC
+LIMIT	10;
+/*2.-*/
+SELECT ProductName AS 'Producto' , UnitPrice AS 'Precio' , Discontinued AS 'Descontinuado' 
+FROM products WHERE UnitPrice > 75;
+/*3.-*/
+SELECT ProductName AS 'Producto', CategoryID AS 'Categoria', UnitPrice AS 'Precio', QuantityPerUnit AS 'Cantidad por Unidad',
+UnitsInStock AS 'Unidades en Stock' FROM products WHERE (UnitPrice < 20 AND CategoryID = 1);
+/*4.-*/
+SELECT CompanyName AS 'Nombre Compañia', ContactName AS 'Nombre Contacto', Address AS 'Dirección', Country AS 'País'
+FROM customers WHERE Country = 'USA' OR Country = 'France' ORDER BY Country ASC;
+/*5.-*/
+SELECT LastName AS 'Apellido', FirstName AS 'Nombre', Country AS 'País', HomePhone AS 'Teléfono Fijo'
+FROM employees WHERE BirthDate BETWEEN '1950-01-01' AND '1960-01-01'; 
+/*6.-*/
+SELECT FirstName AS 'Nombre', LastName AS 'Apellido', BirthDate AS 'Fecha Nacimiento', HomePhone AS 'Teléfono FIjo'
+FROM employees WHERE LastName LIKE 'D%'; 
+/*7.-*/
+SELECT ProductName AS 'Nombre Producto', SupplierID, QuantityPerUnit AS 'Cantidad/Unidad', ReorderLevel AS 'Nivel Reorden'
+FROM products WHERE SupplierID IN (2,6);
+/*8.-*/
+SELECT SUM(UnitPrice) AS 'Suma Productos' FROM products;
+/*9.-*/
+SELECT SupplierID, ROUND(AVG(UnitPrice)) AS 'Promedio_Precio' FROM products GROUP BY SupplierID ORDER BY 'Promedio_Precio';
+/*10.-*/
+SELECT od.ProductID, SUM(od.Quantity) AS 'Total', (SELECT UnitPrice FROM products WHERE ProductID = od.ProductID) AS 'Precio' 
+FROM `order details` od GROUP BY od.ProductID;
+/*11.-*/
+SELECT e.FirstName, e.LastName, (SELECT SUM(od.Quantity) FROM orders o, `order details` od WHERE o.EmployeeID = e.EmployeeID AND od.OrderID = o.OrderID)
+AS 'Unidades Totales' FROM employees e;
